@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalcVerse - Pro Financial & Crypto Calculators</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');body{font-family:'Plus Jakarta Sans',sans-serif;}</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white font-bold shadow-lg shadow-indigo-500/30"><i class="fa-solid fa-calculator"></i></div>
+                <span class="text-xl font-bold tracking-tight text-white">Calc<span class="text-indigo-400">Verse</span></span>
+            </div>
+            <!-- Auth Status Area -->
+            <div id="auth-nav-area" class="flex items-center space-x-2">
+                <button onclick="openAuthModal()" class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all cursor-pointer">
+                    <i class="fa-solid fa-user mr-1"></i> Sign In
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-5xl mx-auto w-full px-4 pt-4"><div class="w-full bg-slate-900 border border-dashed border-slate-800 rounded-xl p-3 text-center text-xs text-slate-500">[ Google AdSense Top Banner Placement ]</div></div>
+    
+    <main class="max-w-5xl mx-auto px-4 py-6 w-full flex-grow">
+        <!-- Tabs -->
+        <div class="flex overflow-x-auto space-x-2 pb-4 scrollbar-none mb-6">
+            <button onclick="switchTab('crypto')" id="btn-crypto" class="tab-btn px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all bg-indigo-600 text-white shadow-md shadow-indigo-600/30 flex items-center space-x-2"><i class="fa-solid fa-coins"></i><span>Crypto Position</span></button>
+            <button onclick="switchTab('forex')" id="btn-forex" class="tab-btn px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800 flex items-center space-x-2"><i class="fa-solid fa-chart-line"></i><span>Forex Position</span></button>
+            <button onclick="switchTab('compound')" id="btn-compound" class="tab-btn px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800 flex items-center space-x-2"><i class="fa-solid fa-wallet"></i><span>Compound Interest</span></button>
+            <button onclick="switchTab('freelance')" id="btn-freelance" class="tab-btn px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800 flex items-center space-x-2"><i class="fa-solid fa-clock"></i><span>Freelance Rate</span></button>
+        </div>
+        
+        <!-- CRYPTO -->
+        <div id="panel-crypto" class="calc-panel space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2"><i class="fa-solid fa-coins text-indigo-400"></i><span>Crypto Position & Risk Calculator</span></h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Select Pair</label>
+                        <select id="crypto-pair" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white">
+                            <option value="BTCUSDT">BTC / USDT</option><option value="ETHUSDT">ETH / USDT</option><option value="SOLUSDT">SOL / USDT</option><option value="XRPUSDT">XRP / USDT</option><option value="ADAUSDT">ADA / USDT</option><option value="DOGEUSDT">DOGE / USDT</option><option value="AVAXUSDT">AVAX / USDT</option><option value="LINKUSDT">LINK / USDT</option><option value="SUIUSDT">SUI / USDT</option><option value="PEPEUSDT">PEPE / USDT</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Position Type</label>
+                        <select id="crypto-side" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"><option value="long">Long (Buy)</option><option value="short">Short (Sell)</option></select>
+                    </div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Account Balance ($)</label><input type="number" id="crypto-balance" value="1000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Risk Percentage (%)</label><input type="number" id="crypto-risk-pct" value="2" step="0.1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Entry Price ($)</label><input type="number" id="crypto-entry" value="65000" step="any" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Stop Loss Price ($)</label><input type="number" id="crypto-stop" value="63700" step="any" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div class="sm:col-span-2"><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Leverage (x)</label><input type="number" id="crypto-leverage" value="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                </div>
+                <button onclick="calculateCrypto()" class="w-full mt-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer">Calculate Position</button>
+            </div>
+            <div id="crypto-results" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl hidden space-y-4">
+                <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider">Calculation Results</h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Risk Amount</span><span id="res-crypto-risk" class="text-lg font-bold text-rose-400">$0.00</span></div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Position Size</span><span id="res-crypto-size" class="text-lg font-bold text-white">0.00</span></div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Margin Required</span><span id="res-crypto-margin" class="text-lg font-bold text-amber-400">$0.00</span></div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Liquidation Price (Est)</span><span id="res-crypto-liq" class="text-lg font-bold text-slate-300">$0.00</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOREX -->
+        <div id="panel-forex" class="calc-panel space-y-6 hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2"><i class="fa-solid fa-chart-line text-indigo-400"></i><span>Forex Lot & Pip Calculator</span></h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Currency Pair</label>
+                        <select id="forex-pair" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white">
+                            <option value="EURUSD">EUR / USD</option><option value="GBPUSD">GBP / USD</option><option value="USDJPY">USD / JPY</option>
+                            <option value="AUDUSD">AUD / USD</option><option value="USDCAD">USD / CAD</option><option value="NZDUSD">NZD / USD</option>
+                            <option value="EURJPY">EUR / JPY</option><option value="GBPJPY">GBP / JPY</option><option value="XAUUSD">XAU / USD (Gold)</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Account Currency</label><select id="forex-currency" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"><option value="USD">USD ($)</option></select></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Account Balance ($)</label><input type="number" id="forex-balance" value="5000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Risk Percentage (%)</label><input type="number" id="forex-risk-pct" value="1" step="0.1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div class="sm:col-span-2"><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Stop Loss (in Pips)</label><input type="number" id="forex-pips" value="30" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                </div>
+                <button onclick="calculateForex()" class="w-full mt-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer">Calculate Lot Size</button>
+            </div>
+            <div id="forex-results" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl hidden space-y-4">
+                <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider">Forex Calculation Results</h3>
+                <div class="grid grid-cols-3 gap-3 text-sm">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Risk Amount</span><span id="res-forex-risk" class="text-base font-bold text-rose-400">$0.00</span></div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Lot Size</span><span id="res-forex-lots" class="text-base font-bold text-white">0.00</span></div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Units</span><span id="res-forex-units" class="text-base font-bold text-amber-400">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPOUND -->
+        <div id="panel-compound" class="calc-panel space-y-6 hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2"><i class="fa-solid fa-wallet text-indigo-400"></i><span>Compound Growth Simulator</span></h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Initial Principal ($)</label><input type="number" id="comp-principal" value="1000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Monthly Contribution ($)</label><input type="number" id="comp-contribution" value="200" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Est. Annual Return (%)</label><input type="number" id="comp-rate" value="12" step="0.5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Time Horizon (Years)</label><input type="number" id="comp-years" value="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                </div>
+                <button onclick="calculateCompound()" class="w-full mt-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer">Simulate Growth</button>
+            </div>
+            <div id="compound-results" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl hidden space-y-5">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Total Contributions</span><span id="res-comp-total" class="text-lg font-bold text-slate-300">$0.00</span></div>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/60"><span class="block text-xs text-slate-400">Estimated Final Balance</span><span id="res-comp-final" class="text-lg font-bold text-emerald-400">$0.00</span></div>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/60 relative h-64"><canvas id="growthChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- FREELANCE -->
+        <div id="panel-freelance" class="calc-panel space-y-6 hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2"><i class="fa-solid fa-clock text-indigo-400"></i><span>Freelance Rate Calculator</span></h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Target Annual Income ($)</label><input type="number" id="free-income" value="60000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Annual Expenses / Taxes ($)</label><input type="number" id="free-expenses" value="15000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Billable Hours / Week</label><input type="number" id="free-hours" value="25" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                    <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Vacation Weeks / Year</label><input type="number" id="free-vacation" value="4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                </div>
+                <button onclick="calculateFreelance()" class="w-full mt-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-600/30 cursor-pointer">Calculate Minimum Rate</button>
+            </div>
+            <div id="freelance-results" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl hidden space-y-4">
+                <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider">Recommended Hourly Rate</h3>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/60 text-center"><span id="res-free-rate" class="text-3xl font-extrabold text-emerald-400">$0.00 / hr</span><p class="text-xs text-slate-400 mt-1">Based on billable hours & desired net after expenses.</p></div>
+            </div>
+        </div>
+
+        <div class="my-8"><div class="w-full bg-slate-900 border border-dashed border-slate-800 rounded-xl p-3 text-center text-xs text-slate-500">[ Google AdSense Middle Banner Placement ]</div></div>
+        
+        <!-- AFFILIATE LINKS -->
+        <section class="mt-8 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+            <h3 class="text-base font-bold text-white mb-3 flex items-center space-x-2"><i class="fa-solid fa-star text-amber-400"></i><span>Recommended Financial Tools</span></h3>
+            <p class="text-xs text-slate-400 mb-4">Explore top-rated platforms used by modern traders and digital professionals.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="https://www.bybit.com" target="_blank" rel="noopener noreferrer" class="block bg-slate-950 border border-slate-800/80 p-3.5 rounded-xl hover:border-indigo-500 transition-all"><div class="flex items-center justify-between"><span class="font-semibold text-sm text-white">Bybit / Crypto Exchange</span><i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i></div><span class="text-xs text-slate-400">Low fees & advanced trading tools</span></a>
+                <a href="https://wise.com" target="_blank" rel="noopener noreferrer" class="block bg-slate-950 border border-slate-800/80 p-3.5 rounded-xl hover:border-indigo-500 transition-all"><div class="flex items-center justify-between"><span class="font-semibold text-sm text-white">Wise Business Account</span><i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i></div><span class="text-xs text-slate-400">Receive global client payouts easily</span></a>
+            </div>
+        </section>
+    </main>
+
+    <!-- AUTH MODAL POPUP -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl relative space-y-4">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 id="auth-title" class="text-lg font-bold text-white">Sign In to CalcVerse</h3>
+            <div id="auth-error" class="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-xl hidden"></div>
+            <div class="space-y-3">
+                <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Email</label><input type="email" id="auth-email" placeholder="you@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+                <div><label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Password</label><input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white"></div>
+            </div>
+            <button onclick="handleAuthSubmit()" id="auth-submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all cursor-pointer">Sign In</button>
+            <div class="text-center text-xs text-slate-400">
+                <span id="auth-switch-text">Don't have an account?</span> 
+                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-indigo-400 font-semibold ml-1 underline cursor-pointer">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-t border-slate-800 bg-slate-900/50 py-6 text-center text-xs text-slate-500 space-y-2">
+        <p>&copy; 2026 CalcVerse. Built for high performance and monetization.</p>
+        <p class="text-slate-600">Explore other apps in the CalcVerse network soon.</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC WITH SUPABASE & AUTH -->
+    <script>
+        // REPLACE THESE WITH YOUR ACTUAL SUPABASE DETAILS FROM SETTINGS > API
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+        let isSignUpMode = false;
+
+        // Check active session on load
+        async function checkUserSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            updateAuthUI(session);
+        }
+
+        function updateAuthUI(session) {
+            const navArea = document.getElementById('auth-nav-area');
+            if (session && session.user) {
+                navArea.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-slate-300 hidden sm:inline">${session.user.email}</span>
+                        <button onclick="handleSignOut()" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all cursor-pointer">Sign Out</button>
+                    </div>
+                `;
+            } else {
+                navArea.innerHTML = `
+                    <button onclick="openAuthModal()" class="text-xs px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all cursor-pointer">
+                        <i class="fa-solid fa-user mr-1"></i> Sign In
+                    </button>
+                `;
+            }
+        }
+
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); document.getElementById('auth-error').classList.add('hidden'); }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('auth-title').innerText = isSignUpMode ? "Create a CalcVerse Account" : "Sign In to CalcVerse";
+            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Sign Up" : "Sign In";
+            document.getElementById('auth-switch-text').innerText = isSignUpMode ? "Already have an account?" : "Don't have an account?";
+            document.getElementById('auth-switch-btn').innerText = isSignUpMode ? "Sign In" : "Sign Up";
+        }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errBox = document.getElementById('auth-error');
+            errBox.classList.add('hidden');
+
+            if (!email || !password) {
+                errBox.innerText = "Please fill in both email and password.";
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (isSignUpMode) {
+                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) {
+                    errBox.innerText = error.message;
+                    errBox.classList.remove('hidden');
+                } else {
+                    alert("Account created successfully! You can now sign in.");
+                    toggleAuthMode();
+                }
+            } else {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    errBox.innerText = error.message;
+                    errBox.classList.remove('hidden');
+                } else {
+                    closeAuthModal();
+                    checkUserSession();
+                }
+            }
+        }
+
+        async function handleSignOut() {
+            await supabaseClient.auth.signOut();
+            checkUserSession();
+        }
+
+        // Initialize session check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkUserSession();
+        });
+
+        // Tab and Calculator Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.calc-panel').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-600/30');
+                b.classList.add('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+            });
+            document.getElementById('panel-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+            activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-md', 'shadow-indigo-600/30');
+        }
+
+        function calculateCrypto() {
+            const bal = parseFloat(document.getElementById('crypto-balance').value) || 0;
+            const riskPct = parseFloat(document.getElementById('crypto-risk-pct').value) || 0;
+            const entry = parseFloat(document.getElementById('crypto-entry').value) || 0;
+            const stop = parseFloat(document.getElementById('crypto-stop').value) || 0;
+            const lev = parseFloat(document.getElementById('crypto-leverage').value) || 1;
+            const side = document.getElementById('crypto-side').value;
+
+            const riskAmt = bal * (riskPct / 100);
+            const priceDiff = Math.abs(entry - stop);
+            if (priceDiff === 0 || entry === 0) return;
+
+            const size = (riskAmt / priceDiff) * entry;
+            const margin = size / lev;
+            const liqDist = (entry / lev) * 0.9;
+            const liqPrice = side === 'long' ? entry - liqDist : entry + liqDist;
+
+            document.getElementById('res-crypto-risk').innerText = '$' + riskAmt.toFixed(2);
+            document.getElementById('res-crypto-size').innerText = size.toFixed(4);
+            document.getElementById('res-crypto-margin').innerText = '$' + margin.toFixed(2);
+            document.getElementById('res-crypto-liq').innerText = '$' + Math.max(0, liqPrice).toFixed(2);
+            document.getElementById('crypto-results').classList.remove('hidden');
+        }
+
+        function calculateForex() {
+            const bal = parseFloat(document.getElementById('forex-balance').value) || 0;
+            const riskPct = parseFloat(document.getElementById('forex-risk-pct').value) || 0;
+            const pips = parseFloat(document.getElementById('forex-pips').value) || 0;
+
+            const riskAmt = bal * (riskPct / 100);
+            if (pips === 0) return;
+
+            const pipValuePerStandardLot = 10;
+            const standardLots = riskAmt / (pips * pipValuePerStandardLot);
+            const units = standardLots * 100000;
+
+            document.getElementById('res-forex-risk').innerText = '$' + riskAmt.toFixed(2);
+            document.getElementById('res-forex-lots').innerText = standardLots.toFixed(2);
+            document.getElementById('res-forex-units').innerText = Math.round(units).toLocaleString();
+            document.getElementById('forex-results').classList.remove('hidden');
+        }
+
+        let growthChartInstance = null;
+        function calculateCompound() {
+            const principal = parseFloat(document.getElementById('comp-principal').value) || 0;
+            const contribution = parseFloat(document.getElementById('comp-contribution').value) || 0;
+            const rate = (parseFloat(document.getElementById('comp-rate').value) || 0) / 100;
+            const years = parseInt(document.getElementById('comp-years').value) || 1;
+
+            let balance = principal;
+            let totalContributed = principal;
+            let labels = ['Year 0'];
+            let dataPoints = [principal];
+
+            for (let y = 1; y <= years; y++) {
+                for (let m = 1; m <= 12; m++) {
+                    balance = (balance + contribution) * (1 + rate / 12);
+                    totalContributed += contribution;
+                }
+                labels.push('Year ' + y);
+                dataPoints.push(balance);
+            }
+
+            document.getElementById('res-comp-total').innerText = '$' + totalContributed.toLocaleString('en-US', {maximumFractionDigits: 2});
+            document.getElementById('res-comp-final').innerText = '$' + balance.toLocaleString('en-US', {maximumFractionDigits: 2});
+            document.getElementById('compound-results').classList.remove('hidden');
+
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            if (growthChartInstance) growthChartInstance.destroy();
+
+            growthChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Portfolio Value ($)',
+                        data: dataPoints,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        function calculateFreelance() {
+            const income = parseFloat(document.getElementById('free-income').value) || 0;
+            const expenses = parseFloat(document.getElementById('free-expenses').value) / 0;
+            const hoursPerWeek = parseFloat(document.getElementById('free-hours').value) || 1;
+            const vacationWeeks = parseFloat(document.getElementById('free-vacation').value) || 0;
+
+            const workingWeeks = 52 - vacationWeeks;
+            const totalBillableHours = workingWeeks * hoursPerWeek;
+            if (totalBillableHours <= 0) return;
+
+            const totalNeeded = income + expenses;
+            const hourlyRate = totalNeeded / totalBillableHours;
+
+            document.getElementById('res-free-rate').innerText = '$' + hourlyRate.toFixed(2) + ' / hr';
+            document.getElementById('freelance-results').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
